@@ -9,38 +9,38 @@ TimeSlot class methods
 TimeSlot::TimeSlot() {
 }
 
-TimeSlot::TimeSlot(timeSlot& timeslot, int index) {
+TimeSlot::TimeSlot(timeSlot* timeslot, int index) {
     _tS = timeslot;
     this->setIndex(index);
 }
 
 void TimeSlot::print() {
     Serial.printf("Timeslot\n");
-    Serial.printf("index=%d\n", _tS.index);
-    Serial.printf("enabled=%d\n", _tS.enabled);
-    Serial.printf("onStartTime=%02d:%02d:%02d\n", _tS.onStartTime.hour(), _tS.onStartTime.minute(), _tS.onStartTime.second());
-    Serial.printf("onEndTime=%02d:%02d:%02d\n", _tS.onEndTime.hour(), _tS.onEndTime.minute(), _tS.onEndTime.second());
-    Serial.printf("durationInSeconds=%d\n", _tS.durationInSeconds);
+    Serial.printf("index=%d\n", _tS->index);
+    Serial.printf("enabled=%d\n", _tS->enabled);
+    Serial.printf("onStartTime=%02d:%02d:%02d\n", _tS->onStartTime.hour(), _tS->onStartTime.minute(), _tS->onStartTime.second());
+    Serial.printf("onEndTime=%02d:%02d:%02d\n", _tS->onEndTime.hour(), _tS->onEndTime.minute(), _tS->onEndTime.second());
+    Serial.printf("durationInSeconds=%d\n", _tS->durationInSeconds);
 }
 
 int TimeSlot::getIndex() {
-    return _tS.index;
+    return _tS->index;
 }
 
 void TimeSlot::setIndex(int index) {
-    _tS.index=index;
+    _tS->index=index;
 }
 
 bool TimeSlot::getEnabled() {
-    return _tS.enabled;
+    return _tS->enabled;
 }
 
 void TimeSlot::setEnabled(bool enabled) {
-    _tS.enabled=enabled;
+    _tS->enabled=enabled;
 }
 
 DateTime TimeSlot::getOnStartTime() {
-    return _tS.onStartTime;
+    return _tS->onStartTime;
 }
 
 void TimeSlot::setOnStartTime(int hour, int minute, int second) {
@@ -48,11 +48,11 @@ void TimeSlot::setOnStartTime(int hour, int minute, int second) {
 }
 
 void TimeSlot::setOnStartTime(DateTime onStartTime) {
-    _tS.onStartTime=onStartTime;
+    _tS->onStartTime=onStartTime;
 }
 
 DateTime TimeSlot::getOnEndTime() {
-    return _tS.onEndTime;
+    return _tS->onEndTime;
 }
 
 void TimeSlot::setOnEndTime(int hour, int minute, int second, DateTime now) {
@@ -60,23 +60,23 @@ void TimeSlot::setOnEndTime(int hour, int minute, int second, DateTime now) {
 }
 
 void TimeSlot::setOnEndTime(DateTime onEndTime, DateTime now) {
-    _tS.onEndTime=onEndTime;
+    _tS->onEndTime=onEndTime;
 
     // when onEndTime is changed, update durationInSeconds.
     this->setOnOffFullDateTimes(now);
-    _tS.durationInSeconds = (_onEndFullTime - _onStartFullTime).totalseconds();
+    _tS->durationInSeconds = (_onEndFullTime - _onStartFullTime).totalseconds();
 }
 
 unsigned int TimeSlot::getDuration() {
-    return _tS.durationInSeconds;
+    return _tS->durationInSeconds;
 }
 
 void TimeSlot::setDuration(unsigned int duration, DateTime now) {
-    _tS.durationInSeconds=duration;
+    _tS->durationInSeconds=duration;
+    this->setOnOffFullDateTimes(now);
     // when durationInSeconds is changed, update onEndTime.
     _onEndFullTime = _onStartFullTime + TimeSpan(duration);
-    _tS.onEndTime = DateTime(0,1,1, _onEndFullTime.hour(), _onEndFullTime.minute(), _onEndFullTime.second());
-    this->setOnOffFullDateTimes(now);
+    _tS->onEndTime = DateTime(0,1,1, _onEndFullTime.hour(), _onEndFullTime.minute(), _onEndFullTime.second());
 }
 
 /*
@@ -86,10 +86,10 @@ switches from ON to OFF.
 void TimeSlot::setOnOffFullDateTimes(DateTime now) {
     // assign date now to the start time
     _onStartFullTime = DateTime(now.year(), now.month(), now.day(), 
-        _tS.onStartTime.hour(), _tS.onStartTime.minute(), _tS.onStartTime.second());
+        _tS->onStartTime.hour(), _tS->onStartTime.minute(), _tS->onStartTime.second());
     // assign date now to the end time 
     _onEndFullTime = DateTime(now.year(), now.month(), now.day(), 
-       _tS.onEndTime.hour(), _tS.onEndTime.minute(), _tS.onEndTime.second());
+       _tS->onEndTime.hour(), _tS->onEndTime.minute(), _tS->onEndTime.second());
 
     Serial.printf("start= %04d/%02d/%02d %02d:%02d:%02d\n", _onStartFullTime.year(), _onStartFullTime.month(),
         _onStartFullTime.day(), _onStartFullTime.hour(), _onStartFullTime.minute(), _onStartFullTime.second());
@@ -111,7 +111,7 @@ void TimeSlot::setOnOffFullDateTimes(DateTime now) {
 }
 
 bool TimeSlot::checkIfOn(DateTime now) {
-    if (_tS.enabled) {
+    if (_tS->enabled) {
         if (now >= _onStartFullTime && now <= _onEndFullTime) {
             _currentState = true;
         }
@@ -163,7 +163,7 @@ void EEPROMConfig::begin() {
 void EEPROMConfig::load() {
     EEPROM.get(_eepromAddr, _eC);
     for (int i=0;i<NUMBER_OF_TIMESLOTS;i++) {
-        _timeslots[i] = new TimeSlot(_eC.timeSlots[i], i);
+        _timeslots[i] = new TimeSlot(&_eC.timeSlots[i], i);
     }
 }
 

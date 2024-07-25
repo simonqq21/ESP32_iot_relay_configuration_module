@@ -50,7 +50,7 @@ class TimeSlot {
     public:
         // TimeSlot(timeSlot& timeslot);
         TimeSlot();
-        TimeSlot(timeSlot &timeslot, int index);
+        TimeSlot(timeSlot *timeslot, int index);
         void print();
         // TimeSlot(timeSlot &timeslot);
         // void setTimeSlot(timeSlot& timeslot);
@@ -69,7 +69,7 @@ class TimeSlot {
         void setOnOffFullDateTimes(DateTime now);
         bool checkIfOn(DateTime now);
     private:
-        timeSlot _tS;
+        timeSlot* _tS;
         // variables stored in memory, not in EEPROM
         DateTime _onStartFullTime, _onEndFullTime; // volatile time with date values for on start and on end
         bool _previousState, _currentState;
