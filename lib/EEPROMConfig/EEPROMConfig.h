@@ -29,7 +29,6 @@ struct timeSlot {
     unsigned short index;
     bool enabled;
     DateTime onStartTime, onEndTime; // nonvolatile time only values for on start and on end
-    DateTime onStartFullTime, onEndFullTime; // volatile time with date values for on start and on end
     unsigned int durationInSeconds;
 };
 
@@ -51,7 +50,9 @@ class TimeSlot {
     public:
         // TimeSlot(timeSlot& timeslot);
         TimeSlot();
-        TimeSlot(timeSlot& timeslot);
+        TimeSlot(timeSlot &timeslot, int index);
+        void print();
+        // TimeSlot(timeSlot &timeslot);
         // void setTimeSlot(timeSlot& timeslot);
         int getIndex();
         void setIndex(int index);
@@ -59,19 +60,25 @@ class TimeSlot {
         void setEnabled(bool enabled);
         DateTime getOnStartTime();
         void setOnStartTime(DateTime onStartTime);
+        void setOnStartTime(int hour, int minute, int second);
         DateTime getOnEndTime();
-        void setOnEndTime(DateTime onEndTime);
+        void setOnEndTime(int hour, int minute, int second, DateTime now);
+        void setOnEndTime(DateTime onEndTime, DateTime now);
         unsigned int getDuration();
-        void setDuration(unsigned int duration);
+        void setDuration(unsigned int duration, DateTime now);
         void setOnOffFullDateTimes(DateTime now);
         bool checkIfOn(DateTime now);
     private:
         timeSlot _tS;
+        // variables stored in memory, not in EEPROM
+        DateTime _onStartFullTime, _onEndFullTime; // volatile time with date values for on start and on end
+        bool _previousState, _currentState;
 };
 
 class EEPROMConfig {
     public:
-        EEPROMConfig(unsigned int eepromAddr);
+        EEPROMConfig(unsigned int eepromAddr = 0);
+        void print();
         void begin();
         void load();
         void save();
@@ -94,8 +101,9 @@ class EEPROMConfig {
         void setLEDSetting(short ledSetting);
         bool getRelayManualSetting();
         void setRelayManualSetting(bool relayManualSetting);
-        timeSlot& getTimeSlot(int index);
-        bool checkIfAnyTimeSlotOn();
+        TimeSlot& getTimeSlot(int index);
+        bool checkIfAnyTimeSlotOn(DateTime now);
+
     private:
         unsigned int _eepromAddr;
         eepromConfig _eC;
