@@ -51,7 +51,8 @@ class TimeSlot {
     public:
         // TimeSlot(timeSlot& timeslot);
         TimeSlot();
-        void setTimeSlot(timeSlot& timeslot);
+        TimeSlot(timeSlot& timeslot);
+        // void setTimeSlot(timeSlot& timeslot);
         int getIndex();
         void setIndex(int index);
         bool getEnabled();
@@ -65,13 +66,15 @@ class TimeSlot {
         void setOnOffFullDateTimes(DateTime now);
         bool checkIfOn(DateTime now);
     private:
-        timeSlot* _tS;
+        timeSlot _tS;
 };
 
 class EEPROMConfig {
     public:
-        EEPROMConfig();
-        void setEEPROMConfig(eepromConfig& _eepromconfig);
+        EEPROMConfig(unsigned int eepromAddr);
+        void begin();
+        void load();
+        void save();
         IPAddress getIPAddress();
         void setIPAddress(IPAddress ip);
         int getPort();
@@ -92,9 +95,11 @@ class EEPROMConfig {
         bool getRelayManualSetting();
         void setRelayManualSetting(bool relayManualSetting);
         timeSlot& getTimeSlot(int index);
+        bool checkIfAnyTimeSlotOn();
     private:
+        unsigned int _eepromAddr;
         eepromConfig _eC;
-        TimeSlot* _timeslots[NUMBER_OF_TIMESLOTS];
+        TimeSlot _timeslots[NUMBER_OF_TIMESLOTS];
 };
 
 #endif
