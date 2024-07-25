@@ -101,13 +101,13 @@ class EEPROMConfig {
         void setLEDSetting(short ledSetting);
         bool getRelayManualSetting();
         void setRelayManualSetting(bool relayManualSetting);
-        TimeSlot& getTimeSlot(int index);
+        TimeSlot* getTimeSlot(int index);
         bool checkIfAnyTimeSlotOn(DateTime now);
 
     private:
         unsigned int _eepromAddr;
         eepromConfig _eC;
-        TimeSlot _timeslots[NUMBER_OF_TIMESLOTS];
+        TimeSlot* _timeslots[NUMBER_OF_TIMESLOTS];
 };
 
 #endif

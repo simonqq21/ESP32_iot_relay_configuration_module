@@ -152,7 +152,7 @@ void EEPROMConfig::print() {
     Serial.printf("ledSetting=%d\n", _eC.ledSetting);
     Serial.printf("relayManualSetting=%d\n", _eC.relayManualSetting);
     for (int i=0;i<NUMBER_OF_TIMESLOTS;i++) {
-        _timeslots[i].print();
+        _timeslots[i]->print();
     }
 }
 
@@ -163,7 +163,7 @@ void EEPROMConfig::begin() {
 void EEPROMConfig::load() {
     EEPROM.get(_eepromAddr, _eC);
     for (int i=0;i<NUMBER_OF_TIMESLOTS;i++) {
-        _timeslots[i] = TimeSlot(_eC.timeSlots[i], i);
+        _timeslots[i] = new TimeSlot(_eC.timeSlots[i], i);
     }
 }
 
@@ -244,13 +244,13 @@ void EEPROMConfig::setRelayManualSetting(bool relayManualSetting) {
     _eC.relayManualSetting = relayManualSetting;
 }
 
-TimeSlot& EEPROMConfig::getTimeSlot(int index) {
+TimeSlot* EEPROMConfig::getTimeSlot(int index) {
     return _timeslots[index];
 }
 
 bool EEPROMConfig::checkIfAnyTimeSlotOn(DateTime now) {
     for (int i=0;i<NUMBER_OF_TIMESLOTS;i++) {
-        if (_timeslots[i].checkIfOn(now)) {
+        if (_timeslots[i]->checkIfOn(now)) {
             return true;
         }
     }
