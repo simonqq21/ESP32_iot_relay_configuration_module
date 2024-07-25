@@ -64,8 +64,10 @@ class TimeSlot {
         DateTime getOnEndTime();
         void setOnEndTime(int hour, int minute, int second, DateTime now);
         void setOnEndTime(DateTime onEndTime, DateTime now);
+        void updateFromEndTimeToDuration();
         unsigned int getDuration();
         void setDuration(unsigned int duration, DateTime now);
+        void updateFromDurationToEndTime();
         void setOnOffFullDateTimes(DateTime now);
         bool checkIfOn(DateTime now);
     private:

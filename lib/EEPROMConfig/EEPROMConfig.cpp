@@ -61,9 +61,12 @@ void TimeSlot::setOnEndTime(int hour, int minute, int second, DateTime now) {
 
 void TimeSlot::setOnEndTime(DateTime onEndTime, DateTime now) {
     _tS->onEndTime=onEndTime;
-
     // when onEndTime is changed, update durationInSeconds.
     this->setOnOffFullDateTimes(now);
+    this->updateFromEndTimeToDuration();
+}
+
+void TimeSlot::updateFromEndTimeToDuration() {
     _tS->durationInSeconds = (_onEndFullTime - _onStartFullTime).totalseconds();
 }
 
@@ -75,7 +78,11 @@ void TimeSlot::setDuration(unsigned int duration, DateTime now) {
     _tS->durationInSeconds=duration;
     this->setOnOffFullDateTimes(now);
     // when durationInSeconds is changed, update onEndTime.
-    _onEndFullTime = _onStartFullTime + TimeSpan(duration);
+    this->updateFromDurationToEndTime();    
+}
+
+void TimeSlot::updateFromDurationToEndTime() {
+    _onEndFullTime = _onStartFullTime + TimeSpan(_tS->durationInSeconds);
     _tS->onEndTime = DateTime(0,1,1, _onEndFullTime.hour(), _onEndFullTime.minute(), _onEndFullTime.second());
 }
 
@@ -91,10 +98,10 @@ void TimeSlot::setOnOffFullDateTimes(DateTime now) {
     _onEndFullTime = DateTime(now.year(), now.month(), now.day(), 
        _tS->onEndTime.hour(), _tS->onEndTime.minute(), _tS->onEndTime.second());
 
-    Serial.printf("start= %04d/%02d/%02d %02d:%02d:%02d\n", _onStartFullTime.year(), _onStartFullTime.month(),
-        _onStartFullTime.day(), _onStartFullTime.hour(), _onStartFullTime.minute(), _onStartFullTime.second());
-    Serial.printf("end= %04d/%02d/%02d %02d:%02d:%02d\n", _onEndFullTime.year(), _onEndFullTime.month(),
-        _onEndFullTime.day(), _onEndFullTime.hour(), _onEndFullTime.minute(), _onEndFullTime.second());
+    // Serial.printf("start= %04d/%02d/%02d %02d:%02d:%02d\n", _onStartFullTime.year(), _onStartFullTime.month(),
+    //     _onStartFullTime.day(), _onStartFullTime.hour(), _onStartFullTime.minute(), _onStartFullTime.second());
+    // Serial.printf("end= %04d/%02d/%02d %02d:%02d:%02d\n", _onEndFullTime.year(), _onEndFullTime.month(),
+    //     _onEndFullTime.day(), _onEndFullTime.hour(), _onEndFullTime.minute(), _onEndFullTime.second());
 
     /* 
     compare the start and end times
@@ -104,10 +111,10 @@ void TimeSlot::setOnOffFullDateTimes(DateTime now) {
     if (_onStartFullTime >= _onEndFullTime) {
         _onEndFullTime = _onEndFullTime + TimeSpan(60*60*24);
     }
-    Serial.printf("start= %04d/%02d/%02d %02d:%02d:%02d\n", _onStartFullTime.year(), _onStartFullTime.month(),
-        _onStartFullTime.day(), _onStartFullTime.hour(), _onStartFullTime.minute(), _onStartFullTime.second());
-    Serial.printf("end= %04d/%02d/%02d %02d:%02d:%02d\n", _onEndFullTime.year(), _onEndFullTime.month(),
-        _onEndFullTime.day(), _onEndFullTime.hour(), _onEndFullTime.minute(), _onEndFullTime.second());
+    // Serial.printf("start= %04d/%02d/%02d %02d:%02d:%02d\n", _onStartFullTime.year(), _onStartFullTime.month(),
+    //     _onStartFullTime.day(), _onStartFullTime.hour(), _onStartFullTime.minute(), _onStartFullTime.second());
+    // Serial.printf("end= %04d/%02d/%02d %02d:%02d:%02d\n", _onEndFullTime.year(), _onEndFullTime.month(),
+    //     _onEndFullTime.day(), _onEndFullTime.hour(), _onEndFullTime.minute(), _onEndFullTime.second());
 }
 
 bool TimeSlot::checkIfOn(DateTime now) {
