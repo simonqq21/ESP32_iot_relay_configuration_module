@@ -69,7 +69,7 @@ class TimeSlot {
         unsigned int getDuration();
         void setDuration(unsigned int duration, DateTime now);
         void updateFromDurationToEndTime();
-        void setOnOffFullDateTimes(DateTime now);
+        void setOnOffFullDateTimes(DateTime now, bool interrupt=false);
         bool checkIfOn(DateTime now);
     private:
         timeSlot* _tS;

@@ -20,7 +20,7 @@ TimeSlot::TimeSlot(timeSlot* timeslot, int index, DateTime now) {
         this->setOnStartTime(DateTime(0,0,0,0,0,0), now);
         this->setOnEndTime(DateTime(0,0,0,0,0,0), now);
     }
-    this->setOnOffFullDateTimes(now);
+    this->setOnOffFullDateTimes(now, true);
 }
 
 void TimeSlot::print() {
@@ -59,7 +59,7 @@ void TimeSlot::setOnStartTime(int hour, int minute, int second, DateTime now) {
 
 void TimeSlot::setOnStartTime(DateTime onStartTime, DateTime now) {
     _tS->onStartTime=onStartTime;
-    this->setOnOffFullDateTimes(now);
+    this->setOnOffFullDateTimes(now, true);
 }
 
 DateTime TimeSlot::getOnEndTime() {
@@ -73,7 +73,7 @@ void TimeSlot::setOnEndTime(int hour, int minute, int second, DateTime now) {
 void TimeSlot::setOnEndTime(DateTime onEndTime, DateTime now) {
     _tS->onEndTime=onEndTime;
     // when onEndTime is changed, update durationInSeconds.
-    this->setOnOffFullDateTimes(now);
+    this->setOnOffFullDateTimes(now, true);
     this->updateFromEndTimeToDuration();
 }
 
@@ -87,7 +87,7 @@ unsigned int TimeSlot::getDuration() {
 
 void TimeSlot::setDuration(unsigned int duration, DateTime now) {
     _tS->durationInSeconds=duration;
-    this->setOnOffFullDateTimes(now);
+    this->setOnOffFullDateTimes(now, true);
     // when durationInSeconds is changed, update onEndTime.
     this->updateFromDurationToEndTime();    
 }
@@ -101,29 +101,36 @@ void TimeSlot::updateFromDurationToEndTime() {
 This method must be called upon initialization of the TimeSlot and every time this timeslot 
 switches from ON to OFF. 
 */
-void TimeSlot::setOnOffFullDateTimes(DateTime now) {
-    // if timeslot is off and DateTime now is greater than onEndFullTime
-    // this->checkIfOn(now);
-    // Serial.println("checked timeslot if on");
-    Serial.println("set full on off date times");
-    if ((!_currentState && now > _onEndFullTime) || !initialized) {
-        // assign date now to the start time
-        _onStartFullTime = DateTime(now.year(), now.month(), now.day(), 
-            _tS->onStartTime.hour(), _tS->onStartTime.minute(), _tS->onStartTime.second());
-        // assign date now to the end time 
-        _onEndFullTime = DateTime(now.year(), now.month(), now.day(), 
-        _tS->onEndTime.hour(), _tS->onEndTime.minute(), _tS->onEndTime.second());
-
-        /* 
-        compare the start and end times
-        if the start datetime has a higher or equal time than the end datetime, 
-            add one day to the end datetime.
-        */
-        if (_onStartFullTime >= _onEndFullTime) {
-            _onEndFullTime = _onEndFullTime + TimeSpan(60*60*24);
-        }
-        initialized = true;
+void TimeSlot::setOnOffFullDateTimes(DateTime now, bool interrupt) {
+    /*
+    if interrupt is false, then the on and off datetimes will only be set
+        if timeslot is off and DateTime now is greater than onEndFullTime.
+    if interrupt is true, then the on and off datetimes will be reset whether or not the
+        timeslot is on, which ay cause the timeslot state to suddenly toggle.
+    */
+    // Serial.println("set full on off date times");
+    if (!interrupt) {
+        //if interrupt is false then only proceed if the current state is off and 
+        // the datetime now is after the onEndFullTime.
+        if (_currentState || now <= _onEndFullTime)
+            return;
     }
+    // assign date now to the start time
+    _onStartFullTime = DateTime(now.year(), now.month(), now.day(), 
+        _tS->onStartTime.hour(), _tS->onStartTime.minute(), _tS->onStartTime.second());
+    // assign date now to the end time 
+    _onEndFullTime = DateTime(now.year(), now.month(), now.day(), 
+    _tS->onEndTime.hour(), _tS->onEndTime.minute(), _tS->onEndTime.second());
+
+    /* 
+    compare the start and end times
+    if the start datetime has a higher or equal time than the end datetime, 
+        add one day to the end datetime.
+    */
+    if (_onStartFullTime >= _onEndFullTime) {
+        _onEndFullTime = _onEndFullTime + TimeSpan(60*60*24);
+    }
+
     // Serial.printf("start= %04d/%02d/%02d %02d:%02d:%02d\n", _onStartFullTime.year(), _onStartFullTime.month(),
     //     _onStartFullTime.day(), _onStartFullTime.hour(), _onStartFullTime.minute(), _onStartFullTime.second());
     // Serial.printf("end= %04d/%02d/%02d %02d:%02d:%02d\n", _onEndFullTime.year(), _onEndFullTime.month(),
@@ -131,16 +138,13 @@ void TimeSlot::setOnOffFullDateTimes(DateTime now) {
 }
 
 bool TimeSlot::checkIfOn(DateTime now) {
+    this->setOnOffFullDateTimes(now);
     if (_tS->enabled) {
         if (now >= _onStartFullTime && now <= _onEndFullTime) {
             _currentState = true;
         }
         else {
             _currentState = false;
-            // set the on and off datetimes for the next day
-            if (_previousState != _currentState) {
-                this->setOnOffFullDateTimes(now);
-            }
         }
         _previousState = _currentState;
         return _currentState;
