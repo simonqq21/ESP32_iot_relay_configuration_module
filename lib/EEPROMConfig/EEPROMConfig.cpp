@@ -6,16 +6,26 @@ TimeSlot class methods
 // TimeSlot::TimeSlot(timeSlot& timeslot): _tS(timeslot) {
 // }
 
-TimeSlot::TimeSlot() {
-}
+// TimeSlot::TimeSlot() {
+// }
 
-TimeSlot::TimeSlot(timeSlot* timeslot, int index) {
+TimeSlot::TimeSlot(timeSlot* timeslot, int index, DateTime now) {
     _tS = timeslot;
     this->setIndex(index);
+    if (_tS->initialized != 0) {
+        _tS->enabled = false;
+        _tS->initialized=0;
+    }
+    if (_tS->onStartTime.hour() > 23 || _tS->onStartTime.hour() < 0) {
+        this->setOnStartTime(DateTime(0,0,0,0,0,0), now);
+        this->setOnEndTime(DateTime(0,0,0,0,0,0), now);
+    }
+    this->setOnOffFullDateTimes(now);
 }
 
 void TimeSlot::print() {
     Serial.printf("Timeslot\n");
+    Serial.printf("initialized=%d\n", _tS->initialized);
     Serial.printf("index=%d\n", _tS->index);
     Serial.printf("enabled=%d\n", _tS->enabled);
     Serial.printf("onStartTime=%02d:%02d:%02d\n", _tS->onStartTime.hour(), _tS->onStartTime.minute(), _tS->onStartTime.second());
@@ -43,12 +53,13 @@ DateTime TimeSlot::getOnStartTime() {
     return _tS->onStartTime;
 }
 
-void TimeSlot::setOnStartTime(int hour, int minute, int second) {
-    this->setOnStartTime(DateTime(0,1,1,hour, minute, second));
+void TimeSlot::setOnStartTime(int hour, int minute, int second, DateTime now) {
+    this->setOnStartTime(DateTime(0,1,1,hour, minute, second), now);
 }
 
-void TimeSlot::setOnStartTime(DateTime onStartTime) {
+void TimeSlot::setOnStartTime(DateTime onStartTime, DateTime now) {
     _tS->onStartTime=onStartTime;
+    this->setOnOffFullDateTimes(now);
 }
 
 DateTime TimeSlot::getOnEndTime() {
@@ -91,25 +102,27 @@ This method must be called upon initialization of the TimeSlot and every time th
 switches from ON to OFF. 
 */
 void TimeSlot::setOnOffFullDateTimes(DateTime now) {
-    // assign date now to the start time
-    _onStartFullTime = DateTime(now.year(), now.month(), now.day(), 
-        _tS->onStartTime.hour(), _tS->onStartTime.minute(), _tS->onStartTime.second());
-    // assign date now to the end time 
-    _onEndFullTime = DateTime(now.year(), now.month(), now.day(), 
-       _tS->onEndTime.hour(), _tS->onEndTime.minute(), _tS->onEndTime.second());
+    // if timeslot is off and DateTime now is greater than onEndFullTime
+    // this->checkIfOn(now);
+    // Serial.println("checked timeslot if on");
+    Serial.println("set full on off date times");
+    if ((!_currentState && now > _onEndFullTime) || !initialized) {
+        // assign date now to the start time
+        _onStartFullTime = DateTime(now.year(), now.month(), now.day(), 
+            _tS->onStartTime.hour(), _tS->onStartTime.minute(), _tS->onStartTime.second());
+        // assign date now to the end time 
+        _onEndFullTime = DateTime(now.year(), now.month(), now.day(), 
+        _tS->onEndTime.hour(), _tS->onEndTime.minute(), _tS->onEndTime.second());
 
-    // Serial.printf("start= %04d/%02d/%02d %02d:%02d:%02d\n", _onStartFullTime.year(), _onStartFullTime.month(),
-    //     _onStartFullTime.day(), _onStartFullTime.hour(), _onStartFullTime.minute(), _onStartFullTime.second());
-    // Serial.printf("end= %04d/%02d/%02d %02d:%02d:%02d\n", _onEndFullTime.year(), _onEndFullTime.month(),
-    //     _onEndFullTime.day(), _onEndFullTime.hour(), _onEndFullTime.minute(), _onEndFullTime.second());
-
-    /* 
-    compare the start and end times
-    if the start datetime has a higher or equal time than the end datetime, 
-        add one day to the end datetime.
-    */
-    if (_onStartFullTime >= _onEndFullTime) {
-        _onEndFullTime = _onEndFullTime + TimeSpan(60*60*24);
+        /* 
+        compare the start and end times
+        if the start datetime has a higher or equal time than the end datetime, 
+            add one day to the end datetime.
+        */
+        if (_onStartFullTime >= _onEndFullTime) {
+            _onEndFullTime = _onEndFullTime + TimeSpan(60*60*24);
+        }
+        initialized = true;
     }
     // Serial.printf("start= %04d/%02d/%02d %02d:%02d:%02d\n", _onStartFullTime.year(), _onStartFullTime.month(),
     //     _onStartFullTime.day(), _onStartFullTime.hour(), _onStartFullTime.minute(), _onStartFullTime.second());
@@ -167,11 +180,13 @@ void EEPROMConfig::begin() {
     EEPROM.begin(sizeof(eepromConfig));
 }
 
-void EEPROMConfig::load() {
+void EEPROMConfig::load(DateTime now) {
     EEPROM.get(_eepromAddr, _eC);
+    Serial.println("loaded _eC");
     for (int i=0;i<NUMBER_OF_TIMESLOTS;i++) {
-        _timeslots[i] = new TimeSlot(&_eC.timeSlots[i], i);
+        _timeslots[i] = new TimeSlot(&_eC.timeSlots[i], i, now);
     }
+    Serial.println("Initialized TimeSlots");
 }
 
 void EEPROMConfig::save() {
@@ -257,6 +272,7 @@ TimeSlot* EEPROMConfig::getTimeSlot(int index) {
 
 bool EEPROMConfig::checkIfAnyTimeSlotOn(DateTime now) {
     for (int i=0;i<NUMBER_OF_TIMESLOTS;i++) {
+        Serial.printf("checkIfAnyTimeSlotOn timeslot index %d returns\n", i);
         if (_timeslots[i]->checkIfOn(now)) {
             return true;
         }

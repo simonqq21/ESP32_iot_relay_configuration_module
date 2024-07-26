@@ -27,6 +27,7 @@ if now > start && now < end
 */
 struct timeSlot {
     unsigned short index;
+    short initialized;
     bool enabled;
     DateTime onStartTime, onEndTime; // nonvolatile time only values for on start and on end
     unsigned int durationInSeconds;
@@ -49,8 +50,8 @@ struct eepromConfig {
 class TimeSlot {
     public:
         // TimeSlot(timeSlot& timeslot);
-        TimeSlot();
-        TimeSlot(timeSlot *timeslot, int index);
+        // TimeSlot();
+        TimeSlot(timeSlot *timeslot, int index,  DateTime now);
         void print();
         // TimeSlot(timeSlot &timeslot);
         // void setTimeSlot(timeSlot& timeslot);
@@ -59,8 +60,8 @@ class TimeSlot {
         bool getEnabled();
         void setEnabled(bool enabled);
         DateTime getOnStartTime();
-        void setOnStartTime(DateTime onStartTime);
-        void setOnStartTime(int hour, int minute, int second);
+        void setOnStartTime(DateTime onStartTime, DateTime now);
+        void setOnStartTime(int hour, int minute, int second, DateTime now);
         DateTime getOnEndTime();
         void setOnEndTime(int hour, int minute, int second, DateTime now);
         void setOnEndTime(DateTime onEndTime, DateTime now);
@@ -75,6 +76,7 @@ class TimeSlot {
         // variables stored in memory, not in EEPROM
         DateTime _onStartFullTime, _onEndFullTime; // volatile time with date values for on start and on end
         bool _previousState, _currentState;
+        bool initialized = false;
 };
 
 class EEPROMConfig {
@@ -82,7 +84,7 @@ class EEPROMConfig {
         EEPROMConfig(unsigned int eepromAddr = 0);
         void print();
         void begin();
-        void load();
+        void load(DateTime now);
         void save();
         IPAddress getIPAddress();
         void setIPAddress(IPAddress ip);
