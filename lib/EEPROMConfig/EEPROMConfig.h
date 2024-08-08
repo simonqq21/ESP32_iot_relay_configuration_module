@@ -33,18 +33,25 @@ struct timeSlot {
     unsigned int durationInSeconds;
 };
 
-struct eepromConfig {
+struct connectionConfig {
     IPAddress ipAddrSetting;
     int portSetting;
     String ssidSetting;
     String passwordSetting;
+};
 
+struct mainConfig {
     bool ntpEnabledSetting;
     short gmtOffsetSetting;
     bool timerEnabledSetting;
     short ledSetting;
     bool relayManualSetting;
     timeSlot timeSlots[NUMBER_OF_TIMESLOTS];
+};
+
+struct eepromConfig {
+    connectionConfig _connectionConfig;
+    mainConfig _mainConfig;
 };
 
 class TimeSlot {
@@ -86,6 +93,8 @@ class EEPROMConfig {
         void begin();
         void load(DateTime now);
         void save();
+        void saveConnectionConfig();
+        void saveMainConfig();
         IPAddress getIPAddress();
         void setIPAddress(IPAddress ip);
         int getPort();
@@ -109,7 +118,7 @@ class EEPROMConfig {
         bool checkIfAnyTimeSlotOn(DateTime now);
 
     private:
-        unsigned int _eepromAddr;
+        unsigned int _eepromAddr, _connectionConfigAddr, _mainConfigAddr;
         eepromConfig _eC;
         TimeSlot* _timeslots[NUMBER_OF_TIMESLOTS];
 };

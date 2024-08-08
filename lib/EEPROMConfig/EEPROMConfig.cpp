@@ -165,16 +165,18 @@ EEPROMConfig::EEPROMConfig(unsigned int eepromAddr) {
 
 void EEPROMConfig::print() {
     Serial.printf("EEPROMConfig\n");
-    Serial.printf("ipAddrSetting=%d.%d.%d.%d\n", _eC.ipAddrSetting[0], _eC.ipAddrSetting[1], 
-        _eC.ipAddrSetting[2], _eC.ipAddrSetting[3]);
-    Serial.printf("portSetting=%d\n", _eC.portSetting);
-    Serial.printf("ssidSetting=%s\n", _eC.ssidSetting);
-    Serial.printf("passwordSetting=%s\n", _eC.passwordSetting);
-    Serial.printf("ntpEnabledSetting=%d\n", _eC.ntpEnabledSetting);
-    Serial.printf("gmtOffsetSetting=%d\n", _eC.gmtOffsetSetting);
-    Serial.printf("timerEnabledSetting=%d\n", _eC.timerEnabledSetting);
-    Serial.printf("ledSetting=%d\n", _eC.ledSetting);
-    Serial.printf("relayManualSetting=%d\n", _eC.relayManualSetting);
+    Serial.printf("ipAddrSetting=%d.%d.%d.%d\n", _eC._connectionConfig.ipAddrSetting[0], 
+        _eC._connectionConfig.ipAddrSetting[1], 
+        _eC._connectionConfig.ipAddrSetting[2], 
+        _eC._connectionConfig.ipAddrSetting[3]);
+    Serial.printf("portSetting=%d\n", _eC._connectionConfig.portSetting);
+    Serial.printf("ssidSetting=%s\n", _eC._connectionConfig.ssidSetting);
+    Serial.printf("passwordSetting=%s\n", _eC._connectionConfig.passwordSetting);
+    Serial.printf("ntpEnabledSetting=%d\n", _eC._mainConfig.ntpEnabledSetting);
+    Serial.printf("gmtOffsetSetting=%d\n", _eC._mainConfig.gmtOffsetSetting);
+    Serial.printf("timerEnabledSetting=%d\n", _eC._mainConfig.timerEnabledSetting);
+    Serial.printf("ledSetting=%d\n", _eC._mainConfig.ledSetting);
+    Serial.printf("relayManualSetting=%d\n", _eC._mainConfig.relayManualSetting);
     for (int i=0;i<NUMBER_OF_TIMESLOTS;i++) {
         _timeslots[i]->print();
     }
@@ -182,92 +184,105 @@ void EEPROMConfig::print() {
 
 void EEPROMConfig::begin() {
     EEPROM.begin(sizeof(eepromConfig));
+    // compute starting addresses for connection config and main config structs
+    _connectionConfigAddr = _eepromAddr;
+    _mainConfigAddr = _connectionConfigAddr + sizeof(connectionConfig);
 }
 
 void EEPROMConfig::load(DateTime now) {
     EEPROM.get(_eepromAddr, _eC);
     Serial.println("loaded _eC");
     for (int i=0;i<NUMBER_OF_TIMESLOTS;i++) {
-        _timeslots[i] = new TimeSlot(&_eC.timeSlots[i], i, now);
+        _timeslots[i] = new TimeSlot(&_eC._mainConfig.timeSlots[i], i, now);
     }
     Serial.println("Initialized TimeSlots");
 }
 
 void EEPROMConfig::save() {
-    EEPROM.put(_eepromAddr, _eC);
+    this->saveConnectionConfig();
+    this->saveMainConfig();
+}
+
+void EEPROMConfig::saveConnectionConfig() {
+    EEPROM.put(_connectionConfigAddr, _eC._connectionConfig);
+    EEPROM.commit();
+}
+
+void EEPROMConfig::saveMainConfig() {
+    EEPROM.put(_mainConfigAddr, _eC._mainConfig);
     EEPROM.commit();
 }
 
 IPAddress EEPROMConfig::getIPAddress() {
-    return _eC.ipAddrSetting;
+    return _eC._connectionConfig.ipAddrSetting;
 }
 
 void EEPROMConfig::setIPAddress(IPAddress ip) {
-    _eC.ipAddrSetting=ip;
+    _eC._connectionConfig.ipAddrSetting=ip;
 }
 
 int EEPROMConfig::getPort() {
-    return _eC.portSetting;
+    return _eC._connectionConfig.portSetting;
 }
 
 void EEPROMConfig::setPort(int port) {
-    _eC.portSetting = port;
+    _eC._connectionConfig.portSetting = port;
 }
 
 String EEPROMConfig::getSSID() {
-    return _eC.ssidSetting;
+    return _eC._connectionConfig.ssidSetting;
 }
 
 void EEPROMConfig::setSSID(String ssid) {
-    _eC.ssidSetting = ssid;
+    _eC._connectionConfig.ssidSetting = ssid;
 }
 
 String EEPROMConfig::getPassword() {
-    return _eC.passwordSetting;
+    return _eC._connectionConfig.passwordSetting;
 }
 
 void EEPROMConfig::setPassword(String password) {
-    _eC.passwordSetting = password;
+    _eC._connectionConfig.passwordSetting = password;
 }
 
 bool EEPROMConfig::getNTPEnabled() {
-    return _eC.ntpEnabledSetting;
+    return _eC._mainConfig.ntpEnabledSetting;
 }
 
 void EEPROMConfig::setNTPEnabled(bool ntpEnabled) {
-    _eC.ntpEnabledSetting = ntpEnabled;
+    _eC._mainConfig.ntpEnabledSetting = ntpEnabled;
 }
 
 short EEPROMConfig::getGMTOffset() {
-    return _eC.gmtOffsetSetting;
+    return _eC._mainConfig.gmtOffsetSetting;
 }
 
 void EEPROMConfig::setGMTOffset(short gmtOffset) {
-    _eC.gmtOffsetSetting = gmtOffset;
+    _eC._mainConfig.gmtOffsetSetting = gmtOffset;
 }
 
 bool EEPROMConfig::getTimerEnabled() {
-    return _eC.timerEnabledSetting;
+    return _eC._mainConfig.timerEnabledSetting;
 }
 
 void EEPROMConfig::setTimerEnabled(bool timerEnabled) {
-    _eC.timerEnabledSetting = timerEnabled;
+    _eC._mainConfig.timerEnabledSetting = timerEnabled;
 }
 
 short EEPROMConfig::getLEDSetting() {
-    return _eC.ledSetting;
+    return _eC._mainConfig.ledSetting;
 }
 
 void EEPROMConfig::setLEDSetting(short ledSetting) {
-    _eC.ledSetting = ledSetting;
+    _eC._mainConfig.ledSetting = ledSetting;
 }
 
 bool EEPROMConfig::getRelayManualSetting() {
-    return _eC.relayManualSetting;
+    return _eC._mainConfig.relayManualSetting;
 }
 
 void EEPROMConfig::setRelayManualSetting(bool relayManualSetting) {
-    _eC.relayManualSetting = relayManualSetting;
+    _eC._mainConfig.relayManualSetting = relayManualSetting;
 }
 
 TimeSlot* EEPROMConfig::getTimeSlot(int index) {
