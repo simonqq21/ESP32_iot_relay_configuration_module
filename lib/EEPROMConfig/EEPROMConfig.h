@@ -7,6 +7,10 @@
 #include <SPI.h>
 
 #define NUMBER_OF_TIMESLOTS 8
+#define SSID_LENGTH 32
+#define PASS_LENGTH 32 
+#define NAME_LENGTH 32 
+
 /*
 07:00-08:00
 08:00-08:00
@@ -36,11 +40,12 @@ struct timeSlot {
 struct connectionConfig {
     IPAddress ipAddrSetting;
     int portSetting;
-    String ssidSetting;
-    String passwordSetting;
+    char ssidSetting[SSID_LENGTH];
+    char passwordSetting[PASS_LENGTH];
 };
 
 struct mainConfig {
+    char deviceName[NAME_LENGTH];
     bool ntpEnabledSetting;
     short gmtOffsetSetting;
     bool timerEnabledSetting;
@@ -104,6 +109,8 @@ class EEPROMConfig {
         String getPassword();
         void setPassword(String password);
 
+        String getName();
+        void setName(String deviceName);
         bool getNTPEnabled();
         void setNTPEnabled(bool ntpEnabled);
         short getGMTOffset();

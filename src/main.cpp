@@ -4,7 +4,7 @@
 EEPROMConfig eC(0);
 
 void setup() {
-  delay(5000);
+  delay(10000);
   Serial.begin(115200);
   eC.begin();
   DateTime now = DateTime(2024, 7,26, 7,0,0);
@@ -18,6 +18,7 @@ void setup() {
   eC.setPort(5555);
   eC.setSSID("wifi-ssid");
   eC.setPassword("wifi-password");
+  eC.setName("basil_ESP32");
   eC.setNTPEnabled(true);
   eC.setTimerEnabled(true);
   eC.setGMTOffset(8);

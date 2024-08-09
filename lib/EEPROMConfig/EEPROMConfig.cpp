@@ -165,21 +165,26 @@ EEPROMConfig::EEPROMConfig(unsigned int eepromAddr) {
 
 void EEPROMConfig::print() {
     Serial.printf("EEPROMConfig\n");
-    Serial.printf("ipAddrSetting=%d.%d.%d.%d\n", _eC._connectionConfig.ipAddrSetting[0], 
-        _eC._connectionConfig.ipAddrSetting[1], 
-        _eC._connectionConfig.ipAddrSetting[2], 
-        _eC._connectionConfig.ipAddrSetting[3]);
-    Serial.printf("portSetting=%d\n", _eC._connectionConfig.portSetting);
-    Serial.printf("ssidSetting=%s\n", _eC._connectionConfig.ssidSetting);
-    Serial.printf("passwordSetting=%s\n", _eC._connectionConfig.passwordSetting);
-    Serial.printf("ntpEnabledSetting=%d\n", _eC._mainConfig.ntpEnabledSetting);
-    Serial.printf("gmtOffsetSetting=%d\n", _eC._mainConfig.gmtOffsetSetting);
-    Serial.printf("timerEnabledSetting=%d\n", _eC._mainConfig.timerEnabledSetting);
-    Serial.printf("ledSetting=%d\n", _eC._mainConfig.ledSetting);
-    Serial.printf("relayManualSetting=%d\n", _eC._mainConfig.relayManualSetting);
+    Serial.printf("ipAddrSetting=%d.%d.%d.%d\n", this->getIPAddress()[0], 
+        this->getIPAddress()[1], 
+        this->getIPAddress()[2], 
+        this->getIPAddress()[3]);
+    Serial.printf("portSetting=%d\n", this->getPort());
+    Serial.printf("ssidSetting=%s\n", this->getSSID());
+    Serial.printf("passwordSetting=%s\n", this->getPassword());
+    Serial.println();
+    Serial.printf("Device name = %s\n", this->getName());
+    Serial.printf("ntpEnabledSetting=%d\n", this->getNTPEnabled());
+    Serial.printf("gmtOffsetSetting=%d\n", this->getGMTOffset());
+    Serial.printf("timerEnabledSetting=%d\n", this->getTimerEnabled());
+    Serial.printf("ledSetting=%d\n", this->getLEDSetting());
+    Serial.printf("relayManualSetting=%d\n", this->getRelayManualSetting());
+    Serial.println();
     for (int i=0;i<NUMBER_OF_TIMESLOTS;i++) {
         _timeslots[i]->print();
+        Serial.println();
     }
+    Serial.println();
 }
 
 void EEPROMConfig::begin() {
@@ -234,7 +239,7 @@ String EEPROMConfig::getSSID() {
 }
 
 void EEPROMConfig::setSSID(String ssid) {
-    _eC._connectionConfig.ssidSetting = ssid;
+    ssid.toCharArray(_eC._connectionConfig.ssidSetting, SSID_LENGTH);
 }
 
 String EEPROMConfig::getPassword() {
@@ -242,7 +247,16 @@ String EEPROMConfig::getPassword() {
 }
 
 void EEPROMConfig::setPassword(String password) {
-    _eC._connectionConfig.passwordSetting = password;
+    password.toCharArray(_eC._connectionConfig.passwordSetting, PASS_LENGTH);
+}
+
+
+String EEPROMConfig::getName() {
+    return _eC._mainConfig.deviceName;
+}
+
+void EEPROMConfig::setName(String deviceName) {
+    deviceName.toCharArray(_eC._mainConfig.deviceName, NAME_LENGTH);
 }
 
 bool EEPROMConfig::getNTPEnabled() {
