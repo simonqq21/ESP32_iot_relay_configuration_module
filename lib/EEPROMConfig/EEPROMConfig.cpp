@@ -6,8 +6,9 @@ TimeSlot class methods
 // TimeSlot::TimeSlot(timeSlot& timeslot): _tS(timeslot) {
 // }
 
-// TimeSlot::TimeSlot() {
-// }
+TimeSlot::TimeSlot(timeSlot* timeslot) {
+    _tS = timeslot;
+}
 
 TimeSlot::TimeSlot(timeSlot* timeslot, int index, DateTime now) {
     _tS = timeslot;
@@ -208,6 +209,9 @@ void EEPROMConfig::begin() {
     // compute starting addresses for connection config and main config structs
     _connectionConfigAddr = _eepromAddr;
     _mainConfigAddr = _connectionConfigAddr + sizeof(connectionConfig);
+    for (int i=0;i<NUMBER_OF_TIMESLOTS;i++) {
+        _timeslots[i] = new TimeSlot(&_eC._mainConfig.timeSlots[i]);
+    }
 }
 
 void EEPROMConfig::load(DateTime now) {
