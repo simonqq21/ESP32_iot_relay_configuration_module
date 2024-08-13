@@ -53,6 +53,14 @@ DateTime TimeSlot::getOnStartTime() {
     return _tS->onStartTime;
 }
 
+String TimeSlot::getOnStartTimeISOString() {
+    // 10:55:00Z
+    char buff[11];
+    snprintf(buff, 11, "%02u:%02u:%02uZ", _tS->onStartTime.hour(), 
+        _tS->onStartTime.minute(), _tS->onStartTime.second());
+    return buff;
+}
+
 void TimeSlot::setOnStartTime(int hour, int minute, int second, DateTime now) {
     this->setOnStartTime(DateTime(0,1,1,hour, minute, second), now);
 }
@@ -64,6 +72,14 @@ void TimeSlot::setOnStartTime(DateTime onStartTime, DateTime now) {
 
 DateTime TimeSlot::getOnEndTime() {
     return _tS->onEndTime;
+}
+
+String TimeSlot::getOnEndTimeISOString() {
+    // 10:55:00Z
+    char buff[11];
+    snprintf(buff, 11, "%02u:%02u:%02uZ", _tS->onEndTime.hour(), 
+        _tS->onEndTime.minute(), _tS->onEndTime.second());
+    return buff;
 }
 
 void TimeSlot::setOnEndTime(int hour, int minute, int second, DateTime now) {

@@ -99,6 +99,14 @@ void setup() {
   Serial.println("Testing of checkIfAnyTimeSlotOn()");
   eC.print();
   Serial.println();
+
+  // testing getISOTime for each timeslot 
+  for (int i=0;i<NUMBER_OF_TIMESLOTS;i++) {
+    Serial.printf("Timeslot %d\n", i);
+    Serial.printf("start time ISO string = %s\n", eC.getTimeSlot(i)->getOnStartTimeISOString());
+    Serial.printf("end time ISO string = %s\n", eC.getTimeSlot(i)->getOnEndTimeISOString());
+  }
+
   // if the time is 06:00, relay must be off.
   now = DateTime(2024, 7, 26, 6, 0, 0);
   Serial.printf("06:00 is %d, it must be 0.\n\n", eC.checkIfAnyTimeSlotOn(now));

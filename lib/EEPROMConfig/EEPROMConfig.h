@@ -72,9 +72,11 @@ class TimeSlot {
         bool getEnabled();
         void setEnabled(bool enabled);
         DateTime getOnStartTime();
+        String getOnStartTimeISOString();
         void setOnStartTime(DateTime onStartTime, DateTime now);
         void setOnStartTime(int hour, int minute, int second, DateTime now);
         DateTime getOnEndTime();
+        String getOnEndTimeISOString();
         void setOnEndTime(int hour, int minute, int second, DateTime now);
         void setOnEndTime(DateTime onEndTime, DateTime now);
         void updateFromEndTimeToDuration();
