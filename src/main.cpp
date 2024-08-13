@@ -107,6 +107,11 @@ void setup() {
     Serial.printf("end time ISO string = %s\n", eC.getTimeSlot(i)->getOnEndTimeISOString());
   }
 
+  // testing setISOTime in a timeslot 
+  eC.getTimeSlot(6)->setOnStartTimeISOString("05:00:00Z", now);
+  eC.getTimeSlot(6)->setOnEndTimeISOString("10:00:00Z", now);
+  eC.getTimeSlot(6)->print();
+
   // if the time is 06:00, relay must be off.
   now = DateTime(2024, 7, 26, 6, 0, 0);
   Serial.printf("06:00 is %d, it must be 0.\n\n", eC.checkIfAnyTimeSlotOn(now));
