@@ -11,10 +11,7 @@ TimeSlot::TimeSlot(timeSlot* timeslot, int index) {
     this->setIndex(index);
 }
 
-TimeSlot::TimeSlot(timeSlot* timeslot, int index, DateTime now) {
-    // _tS = timeslot;
-    // this->setIndex(index);
-    TimeSlot(timeslot, index);
+TimeSlot::TimeSlot(timeSlot* timeslot, int index, DateTime now): TimeSlot(timeslot, index) {
     if (_tS->initialized != 0) {
         _tS->enabled = false;
         _tS->initialized=0;
