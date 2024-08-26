@@ -6,13 +6,12 @@ TimeSlot class methods
 // TimeSlot::TimeSlot(timeSlot& timeslot): _tS(timeslot) {
 // }
 
-TimeSlot::TimeSlot(timeSlot* timeslot) {
-    _tS = timeslot;
-}
-
-TimeSlot::TimeSlot(timeSlot* timeslot, int index, DateTime now) {
+TimeSlot::TimeSlot(timeSlot* timeslot, int index) {
     _tS = timeslot;
     this->setIndex(index);
+}
+
+TimeSlot::TimeSlot(timeSlot* timeslot, int index, DateTime now): TimeSlot(timeslot, index) {
     if (_tS->initialized != 0) {
         _tS->enabled = false;
         _tS->initialized=0;
@@ -222,7 +221,7 @@ void EEPROMConfig::begin() {
     _connectionConfigAddr = _eepromAddr;
     _mainConfigAddr = _connectionConfigAddr + sizeof(connectionConfig);
     for (int i=0;i<NUMBER_OF_TIMESLOTS;i++) {
-        _timeslots[i] = new TimeSlot(&_eC._mainConfig.timeSlots[i]);
+        _timeslots[i] = new TimeSlot(&_eC._mainConfig.timeSlots[i], i);
     }
 }
 
