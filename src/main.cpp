@@ -4,7 +4,6 @@
 EEPROMConfig eC(0);
 
 void setup() {
-  delay(10000);
   Serial.begin(115200);
   eC.begin();
   DateTime now = DateTime(2024, 7,26, 7,0,0);
