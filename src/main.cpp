@@ -13,7 +13,7 @@ void setup() {
   eC.print();
   Serial.println();
   Serial.println("Modifying the EEPROM configuration");
-  eC.setIPAddress(IPAddress(192,168,5,60));
+  eC.setIPAddressIndex(70);
   eC.setPort(5555);
   eC.setSSID("wifi-ssid");
   eC.setPassword("wifi-password");
