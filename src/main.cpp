@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "EEPROMConfig.h"
 
-EEPROMConfig eC(0);
+EEPROMConfig eC;
 
 void setup() {
   Serial.begin(115200);
