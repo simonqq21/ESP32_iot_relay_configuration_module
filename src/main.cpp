@@ -19,10 +19,12 @@ void setup() {
   eC.setPassword("wifi-password");
   eC.setName("basil_ESP32");
   eC.setNTPEnabled(true);
-  eC.setTimerEnabled(true);
+  // eC.setTimerEnabled(true);
+  eC.setOperationMode(2);
   eC.setGMTOffset(8);
   eC.setLEDSetting(2);
   eC.setRelayManualSetting(false);
+  eC.setCountdownDuration(10000);
 
   // now = DateTime(2024, 7,26, 7,0,0);
   // TimeSlot& tS0 = eC.getTimeSlot(0); 
@@ -142,6 +144,11 @@ void setup() {
   // if the time is 00:00 the next day, relay must be on.
   now = DateTime(2024, 7, 27, 0, 0, 0);
   Serial.printf("00:00 the next day is %d, it must be 1.\n\n", eC.checkIfAnyTimeSlotOn(now));
+
+  eC.startCountdownTimer();
+  while(eC.checkCountdownTimer()) {
+    delay(1000);
+  }
 }
 
 void loop() {
