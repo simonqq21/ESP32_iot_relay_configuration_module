@@ -382,10 +382,15 @@ void EEPROMConfig::setCountdownDuration(unsigned long countdownDuration) {
 
 void EEPROMConfig::startCountdownTimer() {
     countdownTimerVars.timeRemaining = _eC._mainConfig.countdownDurationSetting;
+    countdownTimerVars.pause = false;
+}
+
+void EEPROMConfig::stopCountdownTimer() {
+    countdownTimerVars.timeRemaining = -1;
 }
 
 bool EEPROMConfig::checkCountdownTimer(unsigned long min_ms) {
-    if (countdownTimerVars.timeRemaining > min_ms) {
+    if (countdownTimerVars.timeRemaining > min_ms && !countdownTimerVars.pause) {
         unsigned long timeDifference = millis() - countdownTimerVars.lastTimeChecked;
         countdownTimerVars.timeRemaining -= timeDifference;
         countdownTimerVars.lastTimeChecked = millis();
@@ -395,4 +400,12 @@ bool EEPROMConfig::checkCountdownTimer(unsigned long min_ms) {
     else {
         return 0;
     }
+}
+
+void EEPROMConfig::pauseCountdownTimer() {
+    countdownTimerVars.pause = true;
+}
+
+void EEPROMConfig::unpauseCountdownTimer() {
+    countdownTimerVars.pause = false;
 }

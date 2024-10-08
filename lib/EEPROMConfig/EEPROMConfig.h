@@ -22,6 +22,7 @@ struct timeSlot {
 struct countdownTimer {
     long timeRemaining;
     unsigned long lastTimeChecked;
+    bool pause;
 };
 
 struct connectionConfig {
@@ -123,7 +124,10 @@ class EEPROMConfig {
         void setCountdownDuration(unsigned long countdownDuration);
 
         void startCountdownTimer();
+        void stopCountdownTimer();
         bool checkCountdownTimer(unsigned long min_ms = 1000);
+        void pauseCountdownTimer();
+        void unpauseCountdownTimer();
 
     private:
         unsigned int _eepromAddr, _connectionConfigAddr, _mainConfigAddr;
